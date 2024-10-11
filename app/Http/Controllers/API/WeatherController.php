@@ -21,7 +21,7 @@ class WeatherController extends Controller
             'windKph' => 'required|numeric',
             'windDegree' => 'required|numeric',
         ]);
-    
+
         $weather = Weather::create([
             'name' => $validatedData['name'],
             'localtime' => $validatedData['localtime'],
@@ -33,8 +33,18 @@ class WeatherController extends Controller
             'windKph' => $validatedData['windKph'],
             'windDegree' => $validatedData['windDegree'],
         ]);
-    
+
+        if (!$weather) {
+            return response()->json(['message' => 'Weather data not stored'], 500);
+        }
+
         return response()->json(['message' => 'Weather data stored successfully', 'weather' => $weather], 201);
     }
-    
+
+    public function show(Request $request)
+    {
+        $weather = Weather::all();
+
+        return response()->json(['weather' => $weather], 200);
+    }
 }
