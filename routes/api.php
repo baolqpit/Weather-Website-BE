@@ -3,6 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\API\UserController;
+use App\Http\Controllers\API\WeatherController;
 
 /*
 |--------------------------------------------------------------------------
@@ -21,3 +22,5 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 Route::post('send-otp', [UserController::class, 'sendMailToUser']);
 Route::post('verify-otp', [UserController::class, 'verifyOTP']);
+
+Route::post('store-weather-current', [WeatherController::class, 'store']);
