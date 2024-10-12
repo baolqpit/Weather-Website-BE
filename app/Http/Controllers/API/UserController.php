@@ -105,7 +105,7 @@ class UserController extends Controller
         $apiKey = env('WEATHER_API_KEY');
         $location = 'Ho Chi Minh';
 
-        $response = $client->get("http://api.weatherapi.com/v1/forecast.json", [
+        $response = $client->get("https://api.weatherapi.com/v1/forecast.json", [
             'query' => [
                 'key' => $apiKey,
                 'q' => $location,

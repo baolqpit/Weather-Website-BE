@@ -5,6 +5,7 @@ namespace App\Http\Controllers\API;
 use App\Http\Controllers\Controller;
 use App\Models\Weather;
 use Illuminate\Http\Request;
+use GuzzleHttp\Client;
 
 class WeatherController extends Controller
 {
