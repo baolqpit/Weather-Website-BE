@@ -4,11 +4,15 @@ namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
 use App\Mail\OtpMailer;
+use App\Mail\WeatherForecastMail;
 use App\Models\OTP;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
+use GuzzleHttp\Client;
+use Illuminate\Support\Facades\Log;
+use Carbon\Carbon;
 
 class UserController extends Controller
 {
@@ -53,7 +57,7 @@ class UserController extends Controller
     {
         $otpInput = $request['otp'];
         $email = $request['email'];
-        $user = User::where('email', $email)->first();   
+        $user = User::where('email', $email)->first();
         if (!$user) {
             return response()->json([
                 'message' => 'User not found',
@@ -72,7 +76,7 @@ class UserController extends Controller
                 'message' => 'OTP is expired',
             ], 400);
         }
-        
+
         $user->isActive = true;
         $user->save();
         $otpStore->delete();
@@ -82,7 +86,69 @@ class UserController extends Controller
         ]);
     }
 
-    public function subcribeToGetDailyForecast() {}
+    public function getDailyForecastToEmail()
+    {
+        $users = User::where('isActive', true)->get();
 
-    public function unsubcribe() {}
+        $forecast = $this->getTomorrowForecast();
+
+        Log::info($forecast);
+
+        foreach ($users as $user) {
+            Mail::to($user->email)->send(new WeatherForecastMail((object) $forecast));
+        }
+    }
+
+    private function getTomorrowForecast()
+    {
+        $client = new Client();
+        $apiKey = env('WEATHER_API_KEY');
+        $location = 'Ho Chi Minh';
+
+        $response = $client->get("http://api.weatherapi.com/v1/forecast.json", [
+            'query' => [
+                'key' => $apiKey,
+                'q' => $location,
+                'days' => 1,
+                'aqi' => 'no',
+                'alerts' => 'no',
+            ]
+        ]);
+
+        $data = json_decode($response->getBody(), true);
+
+        $tomorrowForecast = $data['forecast']['forecastday'][0];
+
+        $forecastData = [
+            'date' => Carbon::parse($tomorrowForecast['date'])->format('d-m-Y'),
+            'temperature' => $tomorrowForecast['day']['avgtemp_c'] . '°C',
+            'humidity' => $tomorrowForecast['day']['avghumidity'] . '%',
+            'wind' => $tomorrowForecast['day']['maxwind_kph'] . ' kph',
+            'condition' => $tomorrowForecast['day']['condition']['text'],  
+            'icon' => $tomorrowForecast['day']['condition']['icon'], 
+        ];
+
+        return $forecastData;
+
+    }
+
+    public function unsubcribe(Request $request)
+    {
+        $email = $request->input('email');
+        $user = User::where('email', $email)->first();
+
+        Log::info($user);
+
+        if (!$user) {
+            return response()->json([
+                'message' => 'User not found',
+            ], 404);
+        }
+
+        $user->isActive = false;
+        $user->save();
+        return response()->json([
+            'message' => 'User unsubscribed successfully',
+        ]);
+    }
 }

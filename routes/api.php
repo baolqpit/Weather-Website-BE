@@ -22,6 +22,8 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 Route::post('send-otp', [UserController::class, 'sendMailToUser']);
 Route::post('verify-otp', [UserController::class, 'verifyOTP']);
+Route::post('unsubscribe', [UserController::class, 'unsubcribe']);
+
 
 Route::post('store-weather-current', [WeatherController::class, 'store']);
 Route::get('show-weather-list', [WeatherController::class, 'show']);

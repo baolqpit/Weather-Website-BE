@@ -1,4 +1,4 @@
-<!-- resources/views/emails/otpMail.blade.php -->
+
 <!DOCTYPE html>
 <html>
 <head>

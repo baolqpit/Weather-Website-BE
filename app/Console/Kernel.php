@@ -16,6 +16,9 @@ class Kernel extends ConsoleKernel
     protected function schedule(Schedule $schedule)
     {
         // $schedule->command('inspire')->hourly();
+        $schedule->call(function () {
+            app('App\Http\Controllers\API\UserController')->getDailyForecastToEmail();
+        })->dailyAt('05:00');
     }
 
     /**
